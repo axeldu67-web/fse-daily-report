@@ -798,5 +798,8 @@ window.onload = () => {
   renderAuth();
 };
 </script>
+<script>
+document.addEventListener('touchmove', e => { if(document.scrollingElement.scrollTop<=0) e.preventDefault(); }, {passive:false});
+</script>
 </body>
 </html>
