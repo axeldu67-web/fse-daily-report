@@ -644,18 +644,8 @@ async function submitAuth() {
 
 function showAuthErr(msg) { $("authErr").textContent = msg; $("authErr").style.display = "block"; }
 
-async function launchStripe() {
-  if (!currentUser) return;
-  $("payBtn").textContent = "Loading..."; $("payBtn").disabled = true;
-  try {
-    const r = await fetch("/api/checkout", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ email: currentUser.email, name: currentUser.name })
-    });
-    const d = await r.json();
-    if (d.url) window.location.href = d.url;
-    else { $("payBtn").disabled = false; $("payBtn").textContent = T[lang].payBtn; toast("Error: " + d.error); }
-  } catch { $("payBtn").disabled = false; $("payBtn").textContent = T[lang].payBtn; toast("Connection error."); }
+function launchStripe() {
+  window.location.href = "https://buy.stripe.com/3cI28qdxl5Ep2aO0oN8Ra00";
 }
 
 function signOut() {
