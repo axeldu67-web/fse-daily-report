@@ -4,11 +4,12 @@
       "maxDuration": 10
     }
   },
-  "rewrites": [
-    { "source": "/login", "destination": "/login.html" },
-    { "source": "/app", "destination": "/app.html" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/payment", "destination": "/payment.html" },
-    { "source": "/api/(.*)", "destination": "/api/$1" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/login", "dest": "/login.html" },
+    { "src": "/app", "dest": "/app.html" },
+    { "src": "/admin", "dest": "/admin.html" },
+    { "src": "/payment", "dest": "/payment.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
