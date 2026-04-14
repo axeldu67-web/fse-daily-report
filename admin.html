@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Admin — FSE Daily Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f0f4f8;--card:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#94a3b8}
+body{font-family:'Outfit',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh}
+.nav{background:#0a0f1e;padding:16px clamp(16px,3vw,28px);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.nav-logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#3a5bd9,#4a6cf7);display:flex;align-items:center;justify-content:center;font-size:17px}
+.nav-title{font-size:15px;font-weight:700;color:#fff}
+.nav-sub{font-size:11px;color:rgba(255,255,255,.4)}
+.signout{margin-left:auto;border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:7px 14px;background:none;color:rgba(255,255,255,.5);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;padding:12px clamp(16px,3vw,28px);background:#0a0f1e;border-top:1px solid rgba(255,255,255,.06)}
+.tab{border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:8px 16px;background:none;color:rgba(255,255,255,.4);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.tab.on{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)}
+.body{max-width:1100px;margin:0 auto;padding:24px clamp(14px,3vw,28px) 60px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.stat-val{font-size:28px;font-weight:800;letter-spacing:-1px;margin-bottom:4px}
+.stat-lbl{font-size:12px;color:var(--muted);font-weight:500}
+.table{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.table-head{padding:14px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.row{display:flex;align-items:center;gap:12px;padding:13px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.row:last-child{border-bottom:none}
+.row-email{font-size:14px;font-weight:600;flex:1;min-width:160px}
+.row-name{font-size:12px;color:var(--muted)}
+.row-date{font-size:12px;color:var(--muted);margin-left:auto}
+.badge-active{background:#e6f9f3;border:1px solid #00b87a44;border-radius:100px;padding:3px 10px;font-size:11px;font-weight:700;color:#00b87a}
+.badge-canceled{background:#fee2e2;border:1px solid #fca5a5;border-radius:100px;padding:3px 10px;font-size:11px;font-weight:700;color:#dc2626}
+.cancel-btn{border:1px solid #fca5a5;border-radius:8px;padding:5px 12px;background:none;color:#dc2626;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.settings-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.04);margin-bottom:14px}
+.settings-title{font-size:15px;font-weight:700;margin-bottom:14px}
+.srow{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:12px}
+.srow:last-child{border-bottom:none}
+.skey{font-size:14px;font-weight:500;flex:1}
+.sval{font-size:13px;color:var(--muted);font-family:monospace}
+.code{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px;font-family:monospace;font-size:12px;line-height:2;color:#2c3550;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="nav">
+  <div class="nav-logo">⚙️</div>
+  <div><div class="nav-title">FSE Admin</div><div class="nav-sub">Administration Panel</div></div>
+  <a href="/" class="signout" onclick="logout(event)">Sign out</a>
+</div>
+<div class="tabs">
+  <button class="tab on" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab" onclick="showTab('subscribers',this)">👥 Subscribers</button>
+  <button class="tab" onclick="showTab('settings',this)">⚙️ Settings</button>
+</div>
+<div class="body">
+
+  <div id="tabDashboard">
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-val" id="sActive">—</div><div class="stat-lbl">Active subscribers</div></div>
+      <div class="stat"><div class="stat-val" id="sRevenue">—</div><div class="stat-lbl">Monthly revenue</div></div>
+      <div class="stat"><div class="stat-val" id="sCanceled">—</div><div class="stat-lbl">Canceled</div></div>
+      <div class="stat"><div class="stat-val" id="sTotal">—</div><div class="stat-lbl">Total accounts</div></div>
+    </div>
+    <div class="table">
+      <div class="table-head">Recent subscribers</div>
+      <div id="recentList"><div style="padding:20px;color:var(--muted);font-size:13px">Loading...</div></div>
+    </div>
+  </div>
+
+  <div id="tabSubscribers" style="display:none">
+    <div class="table">
+      <div class="table-head">All subscribers <button onclick="loadAdmin()" style="border:1px solid var(--border);border-radius:8px;padding:5px 12px;background:none;font-family:inherit;font-size:12px;cursor:pointer">↻ Refresh</button></div>
+      <div id="subList"><div style="padding:20px;color:var(--muted);font-size:13px">Loading...</div></div>
+    </div>
+  </div>
+
+  <div id="tabSettings" style="display:none">
+    <div class="settings-card">
+      <div class="settings-title">💳 Stripe Configuration</div>
+      <div class="srow"><div class="skey">Price ID</div><div class="sval">price_1TLpkgBz4SYRg8U587qYd0Xt</div></div>
+      <div class="srow"><div class="skey">Product</div><div class="sval">FSE Daily Report — 3,99€/month</div></div>
+      <div class="srow"><div class="skey">Payment Link</div><div class="sval">buy.stripe.com/3cI28q...</div></div>
+    </div>
+    <div class="settings-card">
+      <div class="settings-title">🔐 Admin Access</div>
+      <div class="srow"><div class="skey">Login</div><div class="sval">admin</div></div>
+      <div class="srow"><div class="skey">Password</div><div class="sval">••••••••••</div></div>
+    </div>
+    <div class="settings-card">
+      <div class="settings-title">🌐 Vercel Environment Variables</div>
+      <div class="code">
+        STRIPE_SECRET_KEY = sk_live_...<br>
+        STRIPE_PRICE_ID = price_1TLpkgBz4SYRg8U587qYd0Xt<br>
+        STRIPE_WEBHOOK_SECRET = whsec_*** (stored in Vercel only)<br>
+        ADMIN_PASSWORD = Azerty67...<br>
+        NEXT_PUBLIC_URL = https://fse-daily-report.vercel.app
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auth check
+var user = JSON.parse(localStorage.getItem("fse_user")||"null");
+if(!user || !user.isAdmin){ window.location.href="/login"; }
+
+function logout(e){ e.preventDefault(); localStorage.removeItem("fse_user"); window.location.href="/"; }
+
+function showTab(tab, btn){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  ["tabDashboard","tabSubscribers","tabSettings"].forEach(id=>document.getElementById(id).style.display="none");
+  document.getElementById("tab"+tab.charAt(0).toUpperCase()+tab.slice(1)).style.display="block";
+}
+
+async function loadAdmin(){
+  try{
+    var r=await fetch("/api/admin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminPassword:"Azerty67..."})});
+    var d=await r.json();
+    document.getElementById("sActive").textContent=d.active?.length||0;
+    document.getElementById("sRevenue").textContent="€"+(d.revenue||"0.00");
+    document.getElementById("sCanceled").textContent=d.canceled?.length||0;
+    document.getElementById("sTotal").textContent=(d.active?.length||0)+(d.canceled?.length||0);
+    var renderSubs=(subs,id)=>{
+      if(!subs?.length){document.getElementById(id).innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">No subscribers yet.</div>';return;}
+      document.getElementById(id).innerHTML=subs.map(s=>`
+        <div class="row">
+          <div><div class="row-email">${s.email}</div><div class="row-name">${s.name}</div></div>
+          <div class="row-date">${s.start}</div>
+          <div class="badge-${s.status}">${s.status}</div>
+          ${s.status==="active"?`<button class="cancel-btn" onclick="cancelSub('${s.id}')">Cancel</button>`:""}
+        </div>`).join("");
+    };
+    renderSubs(d.active?.slice(0,5),"recentList");
+    renderSubs([...(d.active||[]),...(d.canceled||[])],"subList");
+  }catch(e){
+    ["recentList","subList"].forEach(id=>{if(document.getElementById(id))document.getElementById(id).innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">Error loading.</div>';});
+  }
+}
+
+async function cancelSub(id){
+  if(!confirm("Cancel this subscription?"))return;
+  try{
+    await fetch("/api/cancel",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({adminPassword:"Azerty67...",subscriptionId:id})});
+    loadAdmin();
+  }catch(e){alert("Error");}
+}
+
+loadAdmin();
+</script>
+</body>
+</html>
