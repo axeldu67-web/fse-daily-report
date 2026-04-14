@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sign In — FSE Daily Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',-apple-system,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.wrap{width:100%;max-width:440px}
+.back{display:inline-flex;align-items:center;gap:6px;color:#94a3b8;font-size:13px;text-decoration:none;margin-bottom:20px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:clamp(24px,4vw,36px);box-shadow:0 4px 24px rgba(0,0,0,.07)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.logo-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#3a5bd9,#4a6cf7);display:flex;align-items:center;justify-content:center;font-size:18px}
+h1{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.sub{font-size:12px;color:#94a3b8;margin-top:2px}
+.err{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;font-size:13px;color:#dc2626;margin-bottom:14px;display:none}
+.ok{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 14px;font-size:13px;color:#16a34a;margin-bottom:14px;display:none}
+.field{margin-bottom:12px}
+label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;display:block}
+input{width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;font-family:inherit;outline:none;background:#f8fafc;transition:border-color .2s}
+input:focus{border-color:#4a6cf7}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#3a5bd9,#4a6cf7);color:#fff;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;margin-top:6px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.forgot{text-align:right;margin-bottom:10px}
+.forgot a,.switch a{color:#4a6cf7;text-decoration:none;font-weight:600}
+.forgot a{font-size:12px}
+.switch{text-align:center;margin-top:14px;font-size:13px;color:#94a3b8}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.plan{border:2px solid #e2e8f0;border-radius:14px;padding:14px;cursor:pointer;transition:all .2s;text-align:center;background:#f8fafc}
+.plan.on{border-color:#4a6cf7;background:#eef2ff}
+.plan-icon{font-size:24px;margin-bottom:6px}
+.plan-name{font-size:14px;font-weight:700;margin-bottom:3px}
+.plan-desc{font-size:11px;color:#94a3b8;line-height:1.4}
+.plan-price{font-size:13px;font-weight:700;color:#4a6cf7;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">← <span id="bk">Back</span></a>
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">⚙️</div>
+      <div><h1 id="ttl">Welcome</h1><div class="sub">FSE Daily Report</div></div>
+    </div>
+    <div class="err" id="err"></div>
+    <div class="ok" id="ok"></div>
+
+    <!-- LOGIN -->
+    <div id="mLogin">
+      <div class="field"><label>Email</label><input type="email" id="lEmail" placeholder="you@company.com"></div>
+      <div class="field"><label id="lPassLbl">Password</label><input type="password" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="forgot"><a href="#" onclick="show('forgot');return false" id="lForgot">Forgot password?</a></div>
+      <button class="btn" onclick="doLogin()" id="lBtn">Sign in</button>
+      <div class="switch" id="lSwitch">No account? <a href="#" onclick="show('register');return false" id="lCreate">Create one</a></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="mRegister" style="display:none">
+      <div class="field"><label id="rNameLbl">Full Name</label><input id="rName" placeholder="John Smith"></div>
+      <div class="field"><label>Email</label><input type="email" id="rEmail" placeholder="you@company.com"></div>
+      <div class="field"><label id="rPassLbl">Password</label><input type="password" id="rPass" placeholder="Min. 6 characters"></div>
+      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px" id="rPlanLbl">Choose your plan</div>
+      <div class="plans">
+        <div class="plan on" id="pFree" onclick="setPlan('free')">
+          <div class="plan-icon">🆓</div>
+          <div class="plan-name" id="pFreeName">Free</div>
+          <div class="plan-desc" id="pFreeDesc">3 reports/day</div>
+          <div class="plan-price">€0/month</div>
+        </div>
+        <div class="plan" id="pPro" onclick="setPlan('pro')">
+          <div class="plan-icon">⭐</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-desc" id="pProDesc">Unlimited reports</div>
+          <div class="plan-price">€3.99/month</div>
+        </div>
+      </div>
+      <button class="btn" onclick="doRegister()" id="rBtn">Create account</button>
+      <div class="switch"><span id="rHave">Already have an account?</span> <a href="#" onclick="show('login');return false" id="rSign">Sign in</a></div>
+    </div>
+
+    <!-- FORGOT -->
+    <div id="mForgot" style="display:none">
+      <p style="font-size:14px;color:#64748b;margin-bottom:14px" id="fDesc">Enter your email to receive a reset link.</p>
+      <div class="field"><label>Email</label><input type="email" id="fEmail" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doForgot()"></div>
+      <button class="btn" onclick="doForgot()" id="fBtn">Send reset link</button>
+      <div class="switch"><a href="#" onclick="show('login');return false" id="fBack">← Back to login</a></div>
+    </div>
+
+    <!-- RESET -->
+    <div id="mReset" style="display:none">
+      <p style="font-size:14px;color:#64748b;margin-bottom:14px" id="rDesc">Enter your new password.</p>
+      <div class="field"><label id="rNewLbl">New password</label><input type="password" id="rNew" placeholder="Min. 6 characters" onkeydown="if(event.key==='Enter')doReset()"></div>
+      <button class="btn" onclick="doReset()" id="rResetBtn">Reset password</button>
+    </div>
+  </div>
+</div>
+<script>
+var lang=localStorage.getItem("fse_lang")||"en";
+var isEn=lang==="en";
+var plan="free";
+var resetEmail="",resetToken="";
+var p=new URLSearchParams(location.search);
+var initMode=p.get("mode")||"login";
+if(p.get("reset")&&p.get("email")){resetToken=p.get("reset");resetEmail=decodeURIComponent(p.get("email"));initMode="reset";}
+
+function setPlan(x){plan=x;document.getElementById("pFree").classList.toggle("on",x==="free");document.getElementById("pPro").classList.toggle("on",x==="pro");}
+function show(m){["Login","Register","Forgot","Reset"].forEach(x=>document.getElementById("m"+x).style.display="none");document.getElementById("m"+m.charAt(0).toUpperCase()+m.slice(1)).style.display="block";document.getElementById("err").style.display="none";document.getElementById("ok").style.display="none";var t={login:isEn?"Welcome back":"Bon retour",register:isEn?"Create account":"Créer un compte",forgot:isEn?"Reset password":"Réinitialiser",reset:isEn?"New password":"Nouveau mot de passe"};document.getElementById("ttl").textContent=t[m]||"";}
+function showErr(m){var e=document.getElementById("err");e.textContent=m;e.style.display="block";document.getElementById("ok").style.display="none";}
+function showOk(m){var e=document.getElementById("ok");e.textContent=m;e.style.display="block";document.getElementById("err").style.display="none";}
+
+async function doLogin(){
+  var email=document.getElementById("lEmail").value.trim();
+  var pass=document.getElementById("lPass").value;
+  if(!email||!pass){showErr(isEn?"All fields required.":"Tous les champs requis.");return;}
+  if(email==="admin"&&pass==="Azerty67..."){localStorage.setItem("fse_user",JSON.stringify({name:"Admin",email:"admin",isAdmin:true,plan:"pro"}));window.location.href="/admin";return;}
+  var users=JSON.parse(localStorage.getItem("fse_users")||"{}");
+  var u=users[email];
+  if(!u||u.password!==pass){showErr(isEn?"Invalid email or password.":"Email ou mot de passe incorrect.");return;}
+  try{var r=await fetch("/api/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});var d=await r.json();if(d.active)u.plan="pro";}catch(e){}
+  localStorage.setItem("fse_user",JSON.stringify({name:u.name,email,plan:u.plan||"free"}));
+  window.location.href="/app";
+}
+
+async function doRegister(){
+  var name=document.getElementById("rName").value.trim();
+  var email=document.getElementById("rEmail").value.trim();
+  var pass=document.getElementById("rPass").value;
+  if(!name||!email||!pass){showErr(isEn?"All fields required.":"Tous les champs requis.");return;}
+  if(pass.length<6){showErr(isEn?"Min. 6 characters.":"Min. 6 caractères.");return;}
+  var users=JSON.parse(localStorage.getItem("fse_users")||"{}");
+  users[email]={name,password:pass,plan};
+  localStorage.setItem("fse_users",JSON.stringify(users));
+  localStorage.setItem("fse_user",JSON.stringify({name,email,plan}));
+  if(plan==="pro"){window.location.href="/payment";}else{window.location.href="/app";}
+}
+
+async function doForgot(){
+  var email=document.getElementById("fEmail").value.trim();
+  if(!email){showErr(isEn?"Email required.":"Email requis.");return;}
+  document.getElementById("fBtn").disabled=true;
+  try{var r=await fetch("/api/reset-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,lang})});var d=await r.json();if(d.success){showOk(isEn?"Reset link sent! Check your inbox.":"Lien envoyé ! Vérifiez votre boîte mail.");}else{showErr(d.error||"Error");}}catch(e){showErr("Connection error.");}
+  document.getElementById("fBtn").disabled=false;
+}
+
+function doReset(){
+  var np=document.getElementById("rNew").value;
+  if(!np||np.length<6){showErr(isEn?"Min. 6 characters.":"Min. 6 caractères.");return;}
+  var users=JSON.parse(localStorage.getItem("fse_users")||"{}");
+  if(!users[resetEmail])users[resetEmail]={name:resetEmail.split("@")[0],plan:"free"};
+  users[resetEmail].password=np;
+  localStorage.setItem("fse_users",JSON.stringify(users));
+  showOk(isEn?"Password updated! You can now sign in.":"Mot de passe mis à jour !");
+  setTimeout(()=>show("login"),2000);
+}
+
+if(!isEn){document.getElementById("bk").textContent="Retour";document.getElementById("lPassLbl").textContent="Mot de passe";document.getElementById("lForgot").textContent="Mot de passe oublié ?";document.getElementById("lSwitch").innerHTML="Pas de compte ? <a href='#' onclick='show(\"register\");return false'>En créer un</a>";document.getElementById("lBtn").textContent="Se connecter";document.getElementById("rNameLbl").textContent="Nom complet";document.getElementById("rPassLbl").textContent="Mot de passe";document.getElementById("rPlanLbl").textContent="Choisissez votre plan";document.getElementById("pFreeName").textContent="Gratuit";document.getElementById("pFreeDesc").textContent="3 rapports/jour";document.getElementById("pProDesc").textContent="Rapports illimités";document.getElementById("rBtn").textContent="Créer mon compte";document.getElementById("rHave").textContent="Déjà un compte ?";document.getElementById("rSign").textContent="Se connecter";document.getElementById("fDesc").textContent="Entrez votre email pour recevoir un lien.";document.getElementById("fBtn").textContent="Envoyer le lien";document.getElementById("fBack").textContent="← Retour";document.getElementById("rDesc").textContent="Entrez votre nouveau mot de passe.";document.getElementById("rNewLbl").textContent="Nouveau mot de passe";document.getElementById("rResetBtn").textContent="Réinitialiser";}
+
+show(initMode);
+</script>
+</body>
+</html>
