@@ -1,4 +1,6 @@
 {
+  "buildCommand": "ls",
+  "outputDirectory": ".",
   "functions": {
     "api/*.js": {
       "maxDuration": 10
