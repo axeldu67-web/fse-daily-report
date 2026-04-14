@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sign In — FSE Daily Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',-apple-system,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.card{width:100%;max-width:420px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:clamp(28px,4vw,40px);box-shadow:0 4px 24px rgba(0,0,0,.07)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.logo-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#3a5bd9,#4a6cf7);display:flex;align-items:center;justify-content:center;font-size:18px}
+h1{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.sub{font-size:12px;color:#94a3b8;margin-top:2px}
+.err{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;font-size:13px;color:#dc2626;margin-bottom:14px;display:none}
+.field{margin-bottom:14px}
+label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block}
+input{width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:15px;font-family:inherit;outline:none;background:#f8fafc;transition:border-color .2s}
+input:focus{border-color:#4a6cf7}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#3a5bd9,#4a6cf7);color:#fff;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;margin-top:6px}
+.switch{text-align:center;margin-top:16px;font-size:13px;color:#94a3b8}
+.switch a{color:#4a6cf7;font-weight:600;text-decoration:none}
+.back{display:inline-flex;align-items:center;gap:6px;color:#94a3b8;font-size:13px;text-decoration:none;margin-bottom:20px}
+</style>
+</head>
+<body>
+<div style="width:100%;max-width:420px">
+  <a href="/" class="back">← <span id="backTxt">Back</span></a>
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">⚙️</div>
+      <div><h1 id="title">Welcome back</h1><div class="sub">FSE Daily Report</div></div>
+    </div>
+    <div class="err" id="err"></div>
+    <div id="fields"></div>
+    <button class="btn" id="submitBtn" onclick="submit()">Sign in</button>
+    <div class="switch" id="switchTxt"></div>
+  </div>
+</div>
+<script>
+var mode = new URLSearchParams(location.search).get("mode") || "login";
+var lang = localStorage.getItem("fse_lang") || "en";
+var isEn = lang === "en";
+
+function renderForm(){
+  var isLogin = mode === "login";
+  document.getElementById("title").textContent = isLogin ? (isEn?"Welcome back":"Bon retour") : (isEn?"Create account":"Créer un compte");
+  document.getElementById("submitBtn").textContent = isLogin ? (isEn?"Sign in":"Se connecter") : (isEn?"Create account":"Créer mon compte");
+  document.getElementById("switchTxt").innerHTML = isLogin
+    ? (isEn?"No account yet?":"Pas encore de compte ?") + ' <a href="/login?mode=register">' + (isEn?"Create one":"En créer un") + '</a>'
+    : (isEn?"Already have an account?":"Déjà un compte ?") + ' <a href="/login">' + (isEn?"Sign in":"Se connecter") + '</a>';
+  document.getElementById("fields").innerHTML = (!isLogin ? '<div class="field"><label>'+(isEn?"Full Name":"Nom complet")+'</label><input id="name" placeholder="'+(isEn?"John Smith":"Jean Dupont")+'"></div>' : "")
+    + '<div class="field"><label>Email</label><input type="email" id="email" placeholder="you@company.com"></div>'
+    + '<div class="field"><label>'+(isEn?"Password":"Mot de passe")+'</label><input type="password" id="pass" placeholder="••••••••" onkeydown="if(event.key===\'Enter\')submit()"></div>';
+}
+
+async function submit(){
+  var err = document.getElementById("err");
+  err.style.display = "none";
+  var email = (document.getElementById("email")||{}).value||"";
+  var pass = (document.getElementById("pass")||{}).value||"";
+  var name = (document.getElementById("name")||{}).value||"";
+
+  // Admin check
+  if(email === "admin" && pass === "Azerty67..."){
+    localStorage.setItem("fse_user", JSON.stringify({name:"Admin",email:"admin",isAdmin:true}));
+    localStorage.setItem("fse_trial","0");
+    window.location.href="/admin"; return;
+  }
+
+  if(!email || !pass){ showErr(isEn?"All fields required.":"Tous les champs requis."); return; }
+
+  if(mode === "register"){
+    if(!name){ showErr(isEn?"Name required.":"Nom requis."); return; }
+    if(pass.length < 6){ showErr(isEn?"Min. 6 characters.":"Min. 6 caractères."); return; }
+    var users = JSON.parse(localStorage.getItem("fse_users")||"{}");
+    users[email] = {name, password:pass};
+    localStorage.setItem("fse_users", JSON.stringify(users));
+    localStorage.setItem("fse_user", JSON.stringify({name, email}));
+    localStorage.setItem("fse_trial","0");
+    window.location.href="/payment"; return;
+  }
+
+  // Login - check subscription
+  try {
+    var r = await fetch("/api/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
+    var d = await r.json();
+    if(d.active){
+      var users2 = JSON.parse(localStorage.getItem("fse_users")||"{}");
+      var n = users2[email]?.name || email.split("@")[0];
+      localStorage.setItem("fse_user", JSON.stringify({name:n, email}));
+      localStorage.setItem("fse_trial","0");
+      window.location.href="/app"; return;
+    }
+    // No active sub - check local users
+    var users3 = JSON.parse(localStorage.getItem("fse_users")||"{}");
+    if(users3[email] && users3[email].password === pass){
+      localStorage.setItem("fse_user", JSON.stringify({name:users3[email].name, email}));
+      localStorage.setItem("fse_trial","0");
+      window.location.href="/payment"; return;
+    }
+    showErr(isEn?"Invalid email or password.":"Email ou mot de passe incorrect.");
+  } catch(e){ showErr("Connection error."); }
+}
+
+function showErr(msg){ var e=document.getElementById("err"); e.textContent=msg; e.style.display="block"; }
+
+renderForm();
+</script>
+</body>
+</html>

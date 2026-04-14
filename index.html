@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>FSE Daily Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',-apple-system,sans-serif;background:#0a0f1e;color:#fff;min-height:100dvh}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(99,140,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(99,140,255,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.glow{position:fixed;top:-20%;left:50%;transform:translateX(-50%);width:80vw;height:50vh;background:radial-gradient(ellipse,rgba(74,108,247,.16) 0%,transparent 65%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:clamp(40px,8vh,80px) clamp(20px,4vw,40px);text-align:center}
+.pill{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:8px 20px 8px 10px;margin-bottom:40px}
+.pill-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#3a5bd9,#4a6cf7);display:flex;align-items:center;justify-content:center;font-size:18px}
+h1{font-size:clamp(36px,7vw,70px);font-weight:800;line-height:1.05;letter-spacing:-2.5px;margin-bottom:20px}
+.grad{background:linear-gradient(90deg,#638cff,#00e5a0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+p{font-size:clamp(15px,2vw,18px);color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:40px;max-width:520px;margin-left:auto;margin-right:auto}
+.lang{display:inline-flex;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:4px;gap:3px;margin-bottom:36px}
+.lang button{border:none;border-radius:100px;padding:8px 20px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;background:none;color:rgba(255,255,255,.4)}
+.lang button.on{background:linear-gradient(135deg,#3a5bd9,#4a6cf7);color:#fff}
+.btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.btn-blue{padding:16px 36px;border-radius:14px;border:none;background:linear-gradient(135deg,#3a5bd9,#4a6cf7);color:#fff;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 32px rgba(74,108,247,.4);text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn-green{padding:16px 36px;border-radius:14px;border:1px solid rgba(0,229,160,.4);background:rgba(0,229,160,.08);color:#00e5a0;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn-green.disabled{opacity:.4;pointer-events:none}
+.note{font-size:12px;color:rgba(255,255,255,.22);margin-top:8px}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:52px;text-align:left}
+.feat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:18px}
+.feat-icon{font-size:24px;margin-bottom:10px}
+.feat-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.feat-desc{font-size:12px;color:rgba(255,255,255,.35);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow"></div>
+<div class="wrap">
+  <div class="pill">
+    <div class="pill-icon">⚙️</div>
+    <span style="font-size:15px;font-weight:700">FSE Daily Report</span>
+  </div>
+  <h1>Your daily reports,<br><span class="grad">written in seconds.</span></h1>
+  <p>The professional tool for Field Service Engineers. Fill in your fields — get a perfectly formatted email, ready to send.</p>
+  <div class="lang">
+    <button class="on" onclick="setLang('en',this)">🇬🇧 English</button>
+    <button onclick="setLang('fr',this)">🇫🇷 Français</button>
+  </div>
+  <div class="btns">
+    <a href="/login" class="btn-blue">🔐 <span id="btnLogin">Sign In</span></a>
+    <a href="#" class="btn-green" id="btnTrial" onclick="startTrial(event)">✨ <span id="btnTrialTxt">Free Trial (1 try)</span></a>
+  </div>
+  <p class="note" id="trialNote">No credit card required for trial</p>
+  <div class="feats">
+    <div class="feat"><div class="feat-icon">📋</div><div class="feat-title" id="f1t">Perfect format</div><div class="feat-desc" id="f1d">Matches your team standards</div></div>
+    <div class="feat"><div class="feat-icon">🌍</div><div class="feat-title">EN & FR</div><div class="feat-desc" id="f2d">Generate in any language</div></div>
+    <div class="feat"><div class="feat-icon">⚡</div><div class="feat-title" id="f3t">Instant</div><div class="feat-desc" id="f3d">Fill, generate, copy & send</div></div>
+  </div>
+</div>
+<script>
+var lang = localStorage.getItem("fse_lang") || "en";
+var T = {
+  en:{btnLogin:"Sign In",btnTrial:"Free Trial (1 try)",trialNote:"No credit card required for trial",f1t:"Perfect format",f1d:"Matches your team standards",f2d:"Generate in any language",f3t:"Instant",f3d:"Fill, generate, copy & send"},
+  fr:{btnLogin:"Se connecter",btnTrial:"Essai gratuit (1 essai)",trialNote:"Aucune carte bancaire pour l'essai",f1t:"Format parfait",f1d:"Respecte vos standards",f2d:"Générez dans les 2 langues",f3t:"Instantané",f3d:"Remplissez, générez, envoyez"}
+};
+function setLang(l,btn){
+  lang=l; localStorage.setItem("fse_lang",l);
+  document.querySelectorAll(".lang button").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  var t=T[l];
+  document.getElementById("btnLogin").textContent=t.btnLogin;
+  document.getElementById("btnTrialTxt").textContent=t.btnTrial;
+  document.getElementById("trialNote").textContent=t.trialNote;
+  document.getElementById("f1t").textContent=t.f1t;
+  document.getElementById("f1d").textContent=t.f1d;
+  document.getElementById("f2d").textContent=t.f2d;
+  document.getElementById("f3t").textContent=t.f3t;
+  document.getElementById("f3d").textContent=t.f3d;
+}
+function getFingerprint(){return btoa([navigator.userAgent,screen.width+"x"+screen.height].join("|")).slice(0,32)}
+function startTrial(e){
+  e.preventDefault();
+  var used=JSON.parse(localStorage.getItem("fse_trial_used")||"[]");
+  var fp=getFingerprint();
+  if(used.includes(fp)){alert(lang==="fr"?"Essai déjà utilisé.":"Trial already used."); window.location.href="/login"; return;}
+  localStorage.setItem("fse_user",JSON.stringify({name:"Guest",email:""}));
+  localStorage.setItem("fse_trial","1");
+  window.location.href="/app";
+}
+// Apply lang on load
+(function(){
+  var l=localStorage.getItem("fse_lang")||"en";
+  if(l==="fr"){
+    var btns=document.querySelectorAll(".lang button");
+    btns[0].classList.remove("on"); btns[1].classList.add("on");
+    setLang("fr",btns[1]);
+  }
+  // Check if already logged in
+  var u=localStorage.getItem("fse_user");
+  if(u) document.querySelector(".btn-blue").href="/app";
+  // Check trial used
+  var used=JSON.parse(localStorage.getItem("fse_trial_used")||"[]");
+  if(used.includes(getFingerprint())){
+    document.getElementById("btnTrial").classList.add("disabled");
+    document.getElementById("btnTrialTxt").textContent=l==="fr"?"Essai épuisé":"Trial used";
+  }
+})();
+</script>
+</body>
+</html>
